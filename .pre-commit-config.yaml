@@ -1,15 +1,18 @@
 ---
 repos:
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
     hooks:
-      - id: yamllint
-        name: yamllint
-        entry: yamllint
-        language: python
-        files: \.(yml|yaml)$
-        args: ["--strict"]
-
+      - id: actionlint
+  # - repo: https://github.com/adrienverge/yamllint
+  #   rev: v1.35.1
+  #   hooks:
+  #     - id: yamllint
+  #       name: yamllint
+  #       entry: yamllint
+  #       language: python
+  #       files: \.(yml|yaml)$
+  #       args: ["--strict"]
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.43.0
     hooks:
