@@ -1,0 +1,5 @@
+environment   = "sandbox"
+project_name  = "github-oidc"
+github_org    = "WahlNetwork"
+github_repo   = "platform"
+iam_role_name = "github-actions"
