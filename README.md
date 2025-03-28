@@ -16,6 +16,34 @@ terraform plan --var-file="inputs/sandbox.tfvars"
 terraform apply --var-file="inputs/sandbox.tfvars"
 
 terraform destroy --var-file="inputs/sandbox.tfvars"
-
 ```
 
+## Terraform Documentation
+
+- `provider.tf`: Configures the AWS provider with the region set to us-west-2 and applies default tags for all resources, including environment, owner, and source.
+- `variables.tf`: Defines input variables such as environment, project_name, github_org, github_repo, and iam_role_name with descriptions and default values.
+- `backend.tf`: Specifies an S3 backend for storing Terraform state, with the configuration details provided in the inputs/sandbox.backend file.
+- `inputs/sandbox.backend`: Contains backend configuration details, including the S3 bucket name, key, region, DynamoDB table for state locking, and encryption settings.
+- `inputs/sandbox.tfvars`: Provides variable values specific to the sandbox environment, such as environment, project_name, github_org, github_repo, and iam_role_name.
+- `main.tf`: Creates an OIDC provider for GitHub Actions and an IAM role with a policy allowing GitHub Actions to assume the role. Attaches the AWS-managed AdministratorAccess policy to the role.
+- `outputs.tf`: Currently empty but can be used to define outputs for this module in the future.
+
+## Workflow Documentation
+
+This file defines a GitHub Actions workflow named "Hello World OIDC". Here's a breakdown of its functionality:
+
+- Trigger: The workflow is triggered manually using the `workflow_dispatch` event.
+
+- Permissions:
+
+  - Grants id-token: write permission, which is required for OpenID Connect (OIDC) authentication.
+  - Grants contents: read permission to allow the workflow to check out the repository.
+
+- Job:
+
+  - A single job named `hello-world` runs on the `ubuntu-latest` virtual environment.
+  - Steps:
+
+    - Checkout Repository: Uses the actions/checkout@v4 action to clone - the repository.
+    - Configure AWS Credentials: Uses the aws-actions/ - configure-aws-credentials@v4 action to authenticate with AWS - using OIDC. It assumes a specified IAM role and sets the AWS - region to `us-west-2`.
+    - Verify AWS Access: Runs the `aws s3 ls` command to list S3 buckets, verifying that the AWS credentials are correctly configured.
