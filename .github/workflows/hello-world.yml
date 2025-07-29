@@ -1,25 +1,30 @@
-name: "Hello World OIDC"
+name: AWS OIDC Authentication Test
 
 on:
   workflow_dispatch:
 
 permissions:
-  id-token: write # Required for OIDC
-  contents: read # Required to check out repo
+  id-token: write
+  contents: read
 
 jobs:
   hello-world:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4 # https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Configure AWS credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4 # https://github.com/aws-actions/configure-aws-credentials
+      - name: Debug OIDC Token
+        run: |
+          curl -sLS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' | cut -d'.' -f2 | base64 -d | jq
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::878582761299:role/github-actions
           aws-region: us-west-2
+          role-session-name: github-oidc-test
 
       - name: Verify AWS access
-        run: aws s3 ls
+        run: aws sts get-caller-identity
