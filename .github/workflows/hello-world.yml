@@ -1,4 +1,4 @@
-name: AWS OIDC Authentication Test
+name: AWS OIDC Authentication
 
 on:
   workflow_dispatch:
@@ -8,23 +8,30 @@ permissions:
   contents: read
 
 jobs:
-  hello-world:
+  authenticate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Debug OIDC Token
+      - name: Debug OIDC Token (for troubleshooting)
         run: |
+          echo "OIDC Token Contents:"
           curl -sLS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' | cut -d'.' -f2 | base64 -d | jq
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' | cut -d'.' -f2 | base64 -d | jq
+          echo "Using Role ARN: arn:aws:iam::878582761299:role/github-actions"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::878582761299:role/github-actions
           aws-region: us-west-2
-          role-session-name: github-oidc-test
+          role-session-name: github-oidc-${{ github.run_id }}
+          mask-aws-account-id: false  # Helps with debugging
 
       - name: Verify AWS access
-        run: aws sts get-caller-identity
+        run: |
+          echo "Caller Identity:"
+          aws sts get-caller-identity
+          echo "S3 Buckets:"
+          aws s3 ls
